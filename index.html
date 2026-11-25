@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MZE2 · Fräsen – Grundlagen</title>
+<style>
+:root{--blue:#07528a;--blue2:#0c6ba8;--green:#62a927;--green-t:#3f7414;--ink:#183247;--muted:#5c7180;--paper:#fff;--bg:#eef3f6;--line:#d6e0e6;--soft:#e8f1f7;--warn:#fff6df;--bad:#9b1c1c;--radius:16px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:12px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--paper);border-radius:var(--radius);padding:8px 16px;margin-bottom:10px}
+.head img{height:52px;width:auto;display:block}
+.head .bg{font-size:.9rem;color:var(--muted);text-align:right}
+.hero{background:linear-gradient(120deg,#064e83,#0873a8);color:#fff;border-radius:var(--radius);padding:16px 20px;margin-bottom:10px}
+.hero h1{margin:0 0 4px;font-size:clamp(1.4rem,4vw,2.1rem);line-height:1.15}
+.hero p{margin:0}
+.chip{display:inline-block;background:rgba(255,255,255,.18);border-radius:99px;padding:2px 10px;font-size:.85rem;margin-top:8px}
+.nav{position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0 8px}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.steps button{min-width:44px;min-height:44px;border-radius:22px;border:2px solid var(--line);background:#fff;color:var(--ink);font-weight:700;cursor:pointer}
+.steps button[aria-current="step"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.steps button.done{border-color:var(--green-t)}
+.bar{height:6px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}.bar span{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.card{background:var(--paper);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px}
+h2{color:var(--blue);font-size:1.45rem;margin:0 0 8px}
+h3{font-size:1.1rem;margin:14px 0 6px}
+.btn{min-height:44px;padding:8px 18px;border-radius:9px;border:0;background:var(--blue);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.sec{background:#fff;color:var(--blue);border:2px solid var(--blue)}
+.btn:focus-visible,.steps button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #f0a500;outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.fb{margin-top:10px;padding:10px 14px;border-radius:10px;display:none}
+.fb.ok{display:block;background:#eaf5df;border-left:6px solid var(--green-t)}
+.fb.no{display:block;background:#fdecec;border-left:6px solid var(--bad)}
+.fb.hint{display:block;background:var(--warn);border-left:6px solid #c58a00}
+.info{background:var(--soft);border-radius:12px;padding:12px 14px;margin:10px 0}
+label{font-weight:600}
+input[type=text],select,textarea{font:inherit;min-height:44px;border:2px solid var(--line);border-radius:9px;padding:6px 10px;background:#fff;color:var(--ink)}
+input[type=text]{width:9em}
+textarea{width:100%;min-height:90px}
+.assign{display:grid;gap:10px}
+.assign .item{border:2px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.sim{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.sim{grid-template-columns:1fr}.head img{height:42px}}
+.sl{display:grid;gap:4px;margin-bottom:8px}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--blue)}
+.out{font-size:1.25rem;font-weight:700;color:var(--blue)}
+svg text{font-family:system-ui,sans-serif}
+table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--line);padding:8px;text-align:left}th{background:var(--soft)}
+.small{font-size:.9rem;color:var(--muted)}
+.save{font-size:.85rem;color:var(--muted)}
+.print-only{display:none}
+@media print{.nav,.hero,.noprint,.btn{display:none!important}.print-only{display:block}body{background:#fff}.card{break-inside:avoid;border:1px solid #ccc}.step{display:block!important}.step:not(#s6){display:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="head"><div class="bg" style="text-align:left">Zerspanungsmechaniker/in · MZE2<br><span class="save" id="saveState" aria-live="polite">Noch nichts gespeichert</span></div><img id="logo" alt="Logo BBS Meppen" src="data:image/jpeg;base64,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indLv+KS/Qw+pyas32/Btnguv+JtH8S/sqawNMtFsbiwWGC/sud0MwmQszZ5O45bceTk5OQa6jxHd2lz8cvhktvcwzMtheswjcNgGAYPHrg16TH4a8PRzX80eh6csmogresLdc3IPUScfN1PX1o0vw14e0o2503Q9NszbBhAYbZEMe7720gcZwM+tS8TBXsn9r/yZW/ApYabtdrp+Dv+J4LbQwn4B/FeTyo951u/BbaMnDpjn2rqNWOfiB8GCeSbG4yT3/0VK9VHh/Qxp13pw0ixFneyNJdQCBfLmdvvM64wxOBkmpX0fSnubG5fTrVptPUrZyGIbrcEbSEP8IIAHFDxabbt3/FWCOEaSV+34O55zbyRW/7T98biRIRN4WiERdgu8i46DPU/SvVKz9T0TR9TurW61HSrK8uLR99vLPArvC2c5UkZByB0rQrmq1FO3krHRSpuF/N3CiiiszUKKKKACiiigAooooA4L4q+EhqtjJqlhFm8jjIlRRzKmP8A0IfqPwr5jg07Ubg7bawuZj/sxkD8zxX2zTdif3V/KvFr5PCdaVWm+Vy300v33XzOPE4ONeSbdrHx/Y+C9auiDcyQ2aHty7fpx+tdJpfgPTISDdS3Ny3cZ2L+nP619ObV/ur+VGxP7i/lXO8lrvT21vSP/BuVTwlOnsjw3S9H0yyx9msIIyP4tmT+Z5rbhzx1r1fYn9xfyo2J/cX8qUchktXUv8v+CbqFjzWKrcVd/tX+6v5UbV/ur+VdMMocft/h/wAEfKcZF2q1FXU7V/ur+VLtX+6PyrpjgHH7Q7GBF2q1GR6itXav90flRtX0H5VvHDtdR2KKhW6kZqxEMYGQamwPQflRgegraMWgFooorQAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/2Q=="></header>
+<section class="hero"><h1>Fräsen – Grundlagen</h1><p>Mit welchen Einstellungen fräsen wir die Grundplatte?</p><span class="chip">ca. 30 Minuten · 6 Schritte</span></section>
+<nav class="nav noprint" aria-label="Schritte"><div class="steps" id="steps"></div><div class="bar"><span id="bar"></span></div></nav>
+
+<!-- Schritt 1 -->
+<section class="step card" id="s1">
+<h2>1 · Euer Auftrag</h2>
+<p>In eurem Ausbildungsbetrieb soll eine Grundplatte aus S235JR bearbeitet werden: Zuerst wird die Oberseite mit einem <b>Messerkopf</b> plangefräst, danach wird mit einem <b>Schaftfräser</b> ein Absatz gefräst.</p>
+<p><b>Euer Ergebnis:</b> eine Einstellkarte mit Fräsverfahren, Drehzahl und Vorschubgeschwindigkeit für beide Werkzeuge.</p>
+<div class="info"><label for="guess">Schätzt zuerst: Welches Werkzeug braucht die höhere Drehzahl?</label>
+<div class="row"><select id="guess" data-key="guess"><option value="">bitte wählen</option><option value="mk">Messerkopf Ø 63 mm</option><option value="sf">Schaftfräser Ø 16 mm</option><option value="gl">beide gleich</option></select><button class="btn" data-check="guess">Prüfen</button></div>
+<div class="fb" id="fb-guess" aria-live="polite"></div></div>
+<div class="row"><button class="btn" data-go="2">Weiter zu Schritt 2</button></div>
+</section>
+
+<!-- Schritt 2 -->
+<section class="step card" id="s2" hidden>
+<h2>2 · Welches Fräsverfahren?</h2>
+<p>Entscheidend ist, wie die Fräserachse zur bearbeiteten Fläche liegt. Ordnet jedem Werkzeug das Verfahren zu.</p>
+<div class="assign" id="assign"></div>
+<div class="row"><button class="btn" data-check="assign">Prüfen</button></div>
+<div class="fb" id="fb-assign" aria-live="polite"></div>
+<div class="row"><button class="btn sec" data-go="1">Zurück</button><button class="btn" data-go="3">Weiter</button></div>
+</section>
+
+<!-- Schritt 3 -->
+<section class="step card" id="s3" hidden>
+<h2>3 · Gleichlauf oder Gegenlauf?</h2>
+<p>Schaut auf die Eingriffsstelle unten am Fräser: Läuft die Schneide <b>mit</b> der Vorschubrichtung des Werkstücks oder <b>dagegen</b>? Schaltet die Drehrichtung um und beobachtet.</p>
+<svg id="mill" style="display:block;width:100%;max-width:560px;margin:0 auto" viewBox="0 0 540 300" role="img" aria-label="Fräser über Werkstück, Drehrichtung umschaltbar">
+<rect x="20" y="0" width="500" height="300" fill="#fff"/>
+<polygon points="30,170 205,170 260,230 510,230 510,280 30,280" fill="#d6e0e6" stroke="#183247" stroke-width="2"/>
+<circle cx="260" cy="130" r="100" fill="#fff" stroke="#07528a" stroke-width="4"/>
+<g id="teeth" stroke="#07528a" stroke-width="4"></g>
+<path id="rot" d="" fill="none" stroke="#07528a" stroke-width="4" marker-end="url(#ah)"/>
+<defs><marker id="ah" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="8" refY="8" orient="auto"><path d="M0,0 L16,8 L0,16 z" fill="#07528a"/></marker><marker id="ag" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="8" refY="8" orient="auto"><path d="M0,0 L16,8 L0,16 z" fill="#3f7414"/></marker><marker id="ar" markerUnits="userSpaceOnUse" markerWidth="16" markerHeight="16" refX="8" refY="8" orient="auto"><path d="M0,0 L16,8 L0,16 z" fill="#c0392b"/></marker></defs>
+<line x1="120" y1="295" x2="330" y2="295" stroke="#3f7414" stroke-width="5" marker-end="url(#ag)"/>
+<text x="345" y="299" fill="#3f7414" font-size="16">Vorschub Werkstück</text>
+<line id="cutv" x1="0" y1="0" x2="0" y2="0" stroke="#c0392b" stroke-width="5" marker-end="url(#ar)"/>
+<text id="cutt" x="0" y="0" fill="#c0392b" font-size="16">Schneide</text>
+</svg>
+<div class="row"><button class="btn sec" id="toggleRot" aria-pressed="false">Drehrichtung umschalten</button><span id="rotLabel" class="small"></span></div>
+<fieldset style="border:0;padding:0;margin:12px 0 0"><legend><b>Wie heißt die angezeigte Fräsrichtung?</b></legend>
+<div class="row"><label><input type="radio" name="dir" value="gleich"> Gleichlauf</label><label><input type="radio" name="dir" value="gegen"> Gegenlauf</label><button class="btn" data-check="dir">Prüfen</button></div></fieldset>
+<div class="fb" id="fb-dir" aria-live="polite"></div>
+<div class="info"><b>Merke:</b> Im <b>Gegenlauf</b> wächst die Spanungsdicke von null an – der Zahn gleitet erst und quetscht. Im <b>Gleichlauf</b> beginnt der Zahn mit der größten Spanungsdicke: bessere Oberfläche, weniger Verschleiß, aber nur mit spielfreiem Vorschubantrieb (z. B. CNC).</div>
+<div class="row"><button class="btn sec" data-go="2">Zurück</button><button class="btn" data-go="4">Weiter</button></div>
+</section>
+
+<!-- Schritt 4 -->
+<section class="step card" id="s4" hidden>
+<h2>4 · Schnittdaten erkunden</h2>
+<p>Verändert die Werte und beobachtet Drehzahl und Vorschubgeschwindigkeit.</p>
+<div class="sim">
+<div>
+<div class="sl"><label for="d">Fräserdurchmesser d = <span id="dv"></span> mm</label><input type="range" id="d" min="6" max="100" step="1" value="16"></div>
+<div class="sl"><label for="vc">Schnittgeschwindigkeit v<sub>c</sub> = <span id="vcv"></span> m/min</label><input type="range" id="vc" min="20" max="300" step="5" value="120"></div>
+<div class="sl"><label for="z">Zähnezahl z = <span id="zv"></span></label><input type="range" id="z" min="1" max="10" step="1" value="4"></div>
+<div class="sl"><label for="fz">Vorschub je Zahn f<sub>z</sub> = <span id="fzv"></span> mm</label><input type="range" id="fz" min="0.02" max="0.30" step="0.01" value="0.05"></div>
+</div>
+<div class="info" aria-live="polite">
+<p>n = v<sub>c</sub> · 1000 / (π · d)</p><p class="out">n ≈ <span id="nOut"></span> 1/min</p>
+<p>v<sub>f</sub> = f<sub>z</sub> · z · n</p><p class="out">v<sub>f</sub> ≈ <span id="vfOut"></span> mm/min</p>
+<p class="small">Probiert: Was passiert mit n, wenn ihr den Durchmesser verdoppelt?</p>
+</div></div>
+<div class="row"><button class="btn sec" data-go="3">Zurück</button><button class="btn" data-go="5">Weiter</button></div>
+</section>
+
+<!-- Schritt 5 -->
+<section class="step card" id="s5" hidden>
+<h2>5 · Einstellwerte berechnen</h2>
+<p>Rechnet selbst (Rechner oder Papier). Rundet n auf ganze 1/min und rechnet v<sub>f</sub> mit der gerundeten Drehzahl.</p>
+<div id="calcs"></div>
+<div class="row"><button class="btn sec" data-go="4">Zurück</button><button class="btn" data-go="6">Weiter zur Einstellkarte</button></div>
+</section>
+
+<!-- Schritt 6 -->
+<section class="step card" id="s6" hidden>
+<div class="print-only" style="text-align:right"><img id="logoPrint" alt="Logo BBS Meppen" style="height:50px"></div>
+<h2>6 · Eure Einstellkarte</h2>
+<div class="row"><label for="name">Name/Kürzel</label><input type="text" id="name" data-key="name" style="width:14em"></div>
+<table id="karte" style="margin-top:12px"><thead><tr><th>Werkzeug</th><th>Fräsverfahren</th><th>n in 1/min</th><th>v<sub>f</sub> in mm/min</th></tr></thead><tbody></tbody></table>
+<h3><label for="dirwahl">Vertiefung: Die Maschine hat Spiel in der Vorschubspindel. Welche Fräsrichtung wählt ihr für den Absatz – und warum?</label></h3>
+<textarea id="dirwahl" data-key="dirwahl" placeholder="Wir wählen …, weil …"></textarea>
+<p class="small">Selbstkontrolle: Rechnet rückwärts v<sub>c</sub> = π · d · n / 1000 – es muss wieder der vorgegebene Wert herauskommen.</p>
+<div class="row noprint"><button class="btn" id="printBtn">Drucken / als PDF sichern</button><button class="btn sec" id="copyBtn">Ergebnis als Text kopieren</button><button class="btn sec" id="resetBtn">Alles zurücksetzen</button></div>
+<div class="fb" id="fb-copy" aria-live="polite"></div>
+<textarea id="copyText" class="noprint" readonly hidden aria-label="Ergebnistext zum Kopieren"></textarea>
+<div id="resetAsk" class="fb hint noprint" role="alertdialog" aria-label="Zurücksetzen bestätigen">Wirklich alle Eingaben löschen? <button class="btn" id="resetYes">Ja, löschen</button> <button class="btn sec" id="resetNo">Abbrechen</button></div>
+<p class="small noprint">Eure Eingaben werden nur auf diesem Gerät gespeichert.</p>
+</section>
+</div>
+
+<script>
+/* ===== Konfiguration (hier anpassen) ===== */
+const CONFIG = {
+  storageKey: "MZE2_Fraesen_Grundlagen_v1",
+  werkzeuge: [
+    { id: "mk", name: "Messerkopf Ø 63 mm", d: 63, z: 5, vc: 150, fz: 0.10, verfahren: "stirn" },
+    { id: "sf", name: "Schaftfräser Ø 16 mm", d: 16, z: 4, vc: 120, fz: 0.05, verfahren: "stirnumfang" }
+  ],
+  toleranz: 0.01 // 1 %
+};
+const VERFAHREN = { stirn: "Stirnfräsen", umfang: "Umfangsfräsen", stirnumfang: "Stirn-Umfangsfräsen" };
+const ASSIGN = [
+  { id: "a1", text: "Messerkopf, Achse senkrecht zur bearbeiteten Fläche", ok: "stirn", why: "Die Stirnseite des Messerkopfs erzeugt die ebene Fläche." },
+  { id: "a2", text: "Walzenfräser, Achse parallel zur bearbeiteten Fläche", ok: "umfang", why: "Die Schneiden am Umfang erzeugen die Fläche." },
+  { id: "a3", text: "Schaftfräser fräst einen Absatz: Boden und Wand gleichzeitig", ok: "stirnumfang", why: "Stirn erzeugt den Boden, Umfang die Wand." }
+];
+
+/* ===== Zustand ===== */
+let S = { v: 1, guess: "", assign: {}, dir: "", cw: true, calc: {}, name: "", dirwahl: "", done: {}, step: 1 };
+const $ = s => document.querySelector(s);
+function load(){ try{ const t = localStorage.getItem(CONFIG.storageKey); if(t){ S = Object.assign(S, JSON.parse(t)); } }catch(e){} }
+function save(){ try{ localStorage.setItem(CONFIG.storageKey, JSON.stringify(S)); $("#saveState").textContent = "Gespeichert · " + new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"}); }catch(e){ $("#saveState").textContent = "Speichern hier nicht möglich – nutzt „Ergebnis kopieren“."; } }
+function num(t){ if(t==null) return NaN; t = String(t).replace(/\s|1\/min|mm\/min|min|mm/gi,"").replace(",","."); return t===""?NaN:Number(t); }
+function fb(id, cls, html){ const e = $("#fb-"+id); e.className = "fb " + cls; e.innerHTML = html; }
+function rpm(w){ return w.vc*1000/(Math.PI*w.d); }
+
+/* ===== Navigation ===== */
+const N = 6;
+function show(n){ S.step = n; if(n===4) S.done[4]=1; for(let i=1;i<=N;i++){ $("#s"+i).hidden = i!==n; const b = $("#st"+i); b.toggleAttribute("aria-current", i===n); if(i===n) b.setAttribute("aria-current","step"); b.classList.toggle("done", !!S.done[i]); }
+  $("#bar").style.width = (Object.keys(S.done).length/5*100)+"%"; if(n===6) buildKarte(); save(); if(window._init) $("#s"+n).scrollIntoView({block:"nearest"}); }
+const st = $("#steps"); for(let i=1;i<=N;i++){ const b=document.createElement("button"); b.id="st"+i; b.textContent=i; b.setAttribute("aria-label","Schritt "+i); b.onclick=()=>show(i); st.appendChild(b); }
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(+b.dataset.go));
+
+/* ===== Schritt 1 ===== */
+const checks = {
+  guess(){ const v=$("#guess").value; S.guess=v; if(!v) return fb("guess","hint","Wählt zuerst eine Antwort.");
+    if(v==="sf"){ S.done[1]=1; fb("guess","ok","✓ Richtig. Bei gleicher Schnittgeschwindigkeit braucht der kleinere Durchmesser eine höhere Drehzahl – der Umfang ist kürzer."); }
+    else fb("guess","no","✗ Nicht ganz. Denkt an den Umfang: Ein kleiner Fräser legt pro Umdrehung einen kürzeren Weg zurück. Für dieselbe Schneidengeschwindigkeit muss er sich also … drehen."); save(); show(1); },
+  assign(){ let ok=0, leer=0, msg=[]; ASSIGN.forEach(a=>{ const v=S.assign[a.id]||""; if(!v) leer++; else if(v===a.ok){ ok++; } else msg.push("„"+a.text+"“: noch einmal prüfen – wie liegt die Achse zur Fläche?"); });
+    if(leer) return fb("assign","hint","Ordnet zuerst alle drei Werkzeuge zu.");
+    if(ok===3){ S.done[2]=1; fb("assign","ok","✓ Alle richtig. "+ASSIGN.map(a=>a.why).join(" ")); } else fb("assign","no","✗ "+ok+" von 3 richtig.<br>"+msg.join("<br>")); save(); show(2); },
+  dir(){ const r=document.querySelector("input[name=dir]:checked"); if(!r) return fb("dir","hint","Wählt eine Antwort.");
+    const korrekt = S.cw ? "gegen" : "gleich"; S.dir=r.value;
+    if(r.value===korrekt){ S.done[3]=1; fb("dir","ok", S.cw ? "✓ Gegenlauf: Die Schneide läuft an der Eingriffsstelle entgegen dem Vorschub. Schaltet um und prüft die andere Richtung." : "✓ Gleichlauf: Schneide und Werkstück bewegen sich an der Eingriffsstelle in dieselbe Richtung."); }
+    else fb("dir","no","✗ Vergleicht nur die zwei Pfeile unten: roter Pfeil (Schneide) und grüner Pfeil (Vorschub). Gleiche Richtung = Gleichlauf, entgegengesetzt = Gegenlauf."); save(); show(3); }
+};
+document.querySelectorAll("[data-check]").forEach(b=>b.onclick=()=>checks[b.dataset.check]());
+
+/* ===== Schritt 2 ===== */
+const as = $("#assign");
+ASSIGN.forEach(a=>{ const d=document.createElement("div"); d.className="item"; const id="sel-"+a.id;
+  d.innerHTML=`<label for="${id}">${a.text}</label><select id="${id}"><option value="">Verfahren wählen</option>${Object.entries(VERFAHREN).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select>`;
+  as.appendChild(d); const s=d.querySelector("select"); s.value=S.assign[a.id]||""; s.onchange=()=>{ S.assign[a.id]=s.value; save(); }; });
+
+/* ===== Schritt 3: Grafik ===== */
+function drawMill(){ const cx=260, cy=130, R=100; let g=""; for(let a=0;a<360;a+=45){ const t=a*Math.PI/180; g+=`<line x1="${cx+75*Math.cos(t)}" y1="${cy+75*Math.sin(t)}" x2="${cx+R*Math.cos(t)}" y2="${cy+R*Math.sin(t)}"/>`; } $("#teeth").innerHTML=g;
+  // Bogen oben: Uhrzeigersinn = links -> rechts über dem Fräser
+  const r=125, a1=-150*Math.PI/180, a2=-30*Math.PI/180; const p1=[cx+r*Math.cos(a1),cy+r*Math.sin(a1)], p2=[cx+r*Math.cos(a2),cy+r*Math.sin(a2)];
+  $("#rot").setAttribute("d", S.cw ? `M${p1} A${r},${r} 0 0 1 ${p2}` : `M${p2} A${r},${r} 0 0 0 ${p1}`);
+  // Schneidenrichtung am unteren Eingriffspunkt: Uhrzeigersinn -> unten nach links
+  const y=250; const v=$("#cutv"); if(S.cw){ v.setAttribute("x1",300); v.setAttribute("x2",200); } else { v.setAttribute("x1",220); v.setAttribute("x2",320); } v.setAttribute("y1",y); v.setAttribute("y2",y);
+  const t=$("#cutt"); t.setAttribute("x", S.cw?115:335); t.setAttribute("y", y+6);
+  $("#rotLabel").textContent = S.cw ? "Fräser dreht im Uhrzeigersinn" : "Fräser dreht gegen den Uhrzeigersinn";
+  $("#toggleRot").setAttribute("aria-pressed", String(!S.cw)); }
+$("#toggleRot").onclick=()=>{ S.cw=!S.cw; document.querySelectorAll("input[name=dir]").forEach(r=>r.checked=false); fb("dir","",""); $("#fb-dir").style.display=""; drawMill(); save(); };
+
+/* ===== Schritt 4: Simulation ===== */
+function sim(){ const d=+$("#d").value, vc=+$("#vc").value, z=+$("#z").value, fz=+$("#fz").value; const n=vc*1000/(Math.PI*d);
+  $("#dv").textContent=d; $("#vcv").textContent=vc; $("#zv").textContent=z; $("#fzv").textContent=fz.toFixed(2).replace(".",",");
+  $("#nOut").textContent=Math.round(n).toLocaleString("de-DE"); $("#vfOut").textContent=Math.round(fz*z*Math.round(n)).toLocaleString("de-DE"); }
+["d","vc","z","fz"].forEach(i=>$("#"+i).oninput=sim);
+
+/* ===== Schritt 5: Rechnen ===== */
+const C = $("#calcs");
+CONFIG.werkzeuge.forEach(w=>{ const box=document.createElement("div"); box.className="info";
+  box.innerHTML=`<h3 style="margin-top:0">${w.name}</h3><p>Gegeben: d = ${w.d} mm, z = ${w.z}, v<sub>c</sub> = ${w.vc} m/min, f<sub>z</sub> = ${String(w.fz).replace(".",",")} mm</p>
+  <div class="row"><label for="n-${w.id}">n =</label><input type="text" inputmode="decimal" id="n-${w.id}"><span>1/min</span>
+  <label for="vf-${w.id}">v<sub>f</sub> =</label><input type="text" inputmode="decimal" id="vf-${w.id}"><span>mm/min</span></div>
+  <div class="row"><button class="btn" id="chk-${w.id}">Prüfen</button><button class="btn sec" id="tip-${w.id}">Tipp</button></div>
+  <div class="fb" id="fb-${w.id}" aria-live="polite"></div>`;
+  C.appendChild(box); const c=S.calc[w.id]||{}; $("#n-"+w.id).value=c.n||""; $("#vf-"+w.id).value=c.vf||""; let tips=0;
+  const nr=Math.round(rpm(w)), vfr=w.fz*w.z*nr;
+  $("#chk-"+w.id).onclick=()=>{ const n=num($("#n-"+w.id).value), vf=num($("#vf-"+w.id).value); S.calc[w.id]={n:$("#n-"+w.id).value, vf:$("#vf-"+w.id).value};
+    if(isNaN(n)||isNaN(vf)){ save(); return fb(w.id,"hint","Tragt beide Werte als Zahl ein."); }
+    const nOk=Math.abs(n-nr)/nr<=CONFIG.toleranz, vfOk=Math.abs(vf-vfr)/vfr<=CONFIG.toleranz*1.5, vfFolge=Math.abs(vf-w.fz*w.z*n)/(w.fz*w.z*n)<=0.015;
+    let m=[];
+    if(nOk) m.push("✓ n richtig (≈ "+nr+" 1/min).");
+    else if(Math.abs(n*1000-nr)/nr<0.02) m.push("✗ n ist 1000-mal zu klein: v<sub>c</sub> steht in m/min, d in mm – deshalb der Faktor 1000.");
+    else if(Math.abs(n/2-nr)/nr<0.02) m.push("✗ n ist doppelt so groß wie erwartet: Habt ihr den Radius statt des Durchmessers eingesetzt?");
+    else m.push("✗ n stimmt noch nicht. Setzt in n = v<sub>c</sub> · 1000 / (π · d) ein.");
+    if(vfOk) m.push("✓ v<sub>f</sub> richtig (≈ "+Math.round(vfr)+" mm/min).");
+    else if(!nOk && vfFolge) m.push("➜ v<sub>f</sub> ist mit eurem n richtig gerechnet (Folgefehler).");
+    else m.push("✗ v<sub>f</sub> stimmt noch nicht: v<sub>f</sub> = f<sub>z</sub> · z · n.");
+    if(nOk&&vfOk){ S.calc[w.id].ok=1; } if(CONFIG.werkzeuge.every(x=>(S.calc[x.id]||{}).ok)) S.done[5]=1;
+    fb(w.id, nOk&&vfOk?"ok":"no", m.join("<br>")); save(); show(5); };
+  $("#tip-"+w.id).onclick=()=>{ tips=Math.min(tips+1,3); const t=["Denkanstoß: Erst n berechnen, dann v<sub>f</sub> – v<sub>f</sub> braucht n.",
+    "Teilschritt: n = "+w.vc+" · 1000 / (π · "+w.d+") 1/min",
+    "Lösungsweg: n ≈ "+rpm(w).toFixed(1).replace(".",",")+" ≈ "+nr+" 1/min; v<sub>f</sub> = "+String(w.fz).replace(".",",")+" · "+w.z+" · "+nr+" ≈ "+Math.round(vfr)+" mm/min"];
+    fb(w.id,"hint",t.slice(0,tips).join("<br>")); };
+});
+
+/* ===== Schritt 6 ===== */
+function fmt(t){ const x=num(t); return isNaN(x)?"–":x.toLocaleString("de-DE",{maximumFractionDigits:1}); }
+function buildKarte(){ const tb=$("#karte tbody"); tb.innerHTML=""; CONFIG.werkzeuge.forEach(w=>{ const c=S.calc[w.id]||{}; const a = w.id==="mk" ? S.assign.a1 : S.assign.a3;
+  const tr=document.createElement("tr"); tr.innerHTML=`<td>${w.name}</td><td>${a?VERFAHREN[a]:"–"}</td><td>${fmt(c.n)}</td><td>${fmt(c.vf)}</td>`; tb.appendChild(tr); }); }
+document.querySelectorAll("[data-key]").forEach(el=>{ if(el.tagName!=="SELECT"||el.id==="guess"){ el.value=S[el.dataset.key]||""; el.addEventListener("input",()=>{ S[el.dataset.key]=el.value; save(); }); } });
+$("#logoPrint").src=$("#logo").src;
+$("#printBtn").onclick=()=>{ try{ window.print(); }catch(e){ fb("copy","hint","Drucken ist hier gesperrt. Kopiert das Ergebnis oder fotografiert die Karte."); } };
+function resultText(){ let t="Einstellkarte Fräsen – Grundlagen (MZE2)\nName: "+(S.name||"–")+"\n"; CONFIG.werkzeuge.forEach(w=>{ const c=S.calc[w.id]||{}; const a=w.id==="mk"?S.assign.a1:S.assign.a3; t+=w.name+": "+(a?VERFAHREN[a]:"–")+", n = "+fmt(c.n)+" 1/min, vf = "+fmt(c.vf)+" mm/min\n"; }); return t+"Fräsrichtung bei Spindelspiel: "+(S.dirwahl||"–"); }
+$("#copyBtn").onclick=async()=>{ const t=resultText(); const ta=$("#copyText"); ta.hidden=false; ta.value=t; try{ await navigator.clipboard.writeText(t); fb("copy","ok","✓ Ergebnis kopiert – fügt es in LearningView ein."); }catch(e){ ta.select(); fb("copy","hint","Kopieren automatisch nicht möglich: Text unten markieren und kopieren."); } };
+$("#resetAsk").style.display="none";
+$("#resetBtn").onclick=()=>{ $("#resetAsk").style.display="block"; };
+$("#resetNo").onclick=()=>{ $("#resetAsk").style.display="none"; };
+$("#resetYes").onclick=()=>{ try{ localStorage.removeItem(CONFIG.storageKey); }catch(e){} location.reload(); };
+
+load(); drawMill(); sim(); show(S.step||1); window._init=true;
+</script>
+</body>
+</html>
